@@ -17,7 +17,7 @@ docker compose down --volumes --remove-orphans
 
 # 2. Re-build et démarrage en mode détaché
 echo -e "${YELLOW}Redémarrage des services...${NC}"
-docker compose up -d --build
+docker compose -f docker-compose.dev.yml up -d --build
 
 # Boucle pour vérifier l'état "healthy" du service "db"
 # On boucle tant que le status n'est pas "healthy"
