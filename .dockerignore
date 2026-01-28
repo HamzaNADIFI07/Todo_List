@@ -1,0 +1,27 @@
+# Dossiers Git
+.git
+.gitignore
+
+# Environnements virtuels
+env
+venv
+.venv
+
+# Cache Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers de configuration Docker (inutiles dans le conteneur)
+docker-compose.*
+Dockerfile
+Makefile
+reset.sh
+README.md
+assets/
+
+# Système
+.DS_Store
+.env
+.env.example
