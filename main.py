@@ -1,14 +1,28 @@
+import os
 from flask import Flask, jsonify, request
 from controllers.todo_controller import ToDoController
+from database import db
+from dotenv import load_dotenv
+
+# Charge les variables du fichier .env
+load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    todo = ToDoController()
 
-    def tasks_with_index():
-        """Formate les tâches avec leur index pour la réponse JSON."""
-        tasks = todo.list_tasks()
-        return [{"index": i + 1, **t.to_dict()} for i, t in enumerate(tasks)]
+    # --- CONFIGURATION ---
+    # Récupération sécurisée depuis le .env
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    # Initialisation de la DB
+    db.init_app(app)
+
+    # Création des tables
+    with app.app_context():
+        db.create_all()
+
+    todo = ToDoController()
 
     # Vérification de l’état de l’API
     @app.get("/health")
@@ -21,7 +35,8 @@ def create_app():
     # Liste toutes les tâches
     @app.get("/api/tasks")
     def list_tasks():
-        return jsonify({"tasks": tasks_with_index()})
+        tasks = todo.list_tasks()
+        return jsonify({"tasks": [t.to_dict() for t in tasks]})
 
     # Crée une nouvelle tâche
     @app.post("/api/tasks")
@@ -43,7 +58,7 @@ def create_app():
         except KeyError:
             return jsonify({"error": f"Tâche id={task_id} introuvable."}), 404
 
-    # Met à jour une tâche (titre )
+    # Met à jour une tâche (titre)
     @app.patch("/api/tasks/<int:task_id>")
     def update_task(task_id: int):
         data = request.get_json(silent=True) or {}
@@ -68,7 +83,7 @@ def create_app():
 
     return app
 
-
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True)
+    debug_mode = os.getenv('FLASK_DEBUG', '0') == '1'
+    app.run(debug=debug_mode)
